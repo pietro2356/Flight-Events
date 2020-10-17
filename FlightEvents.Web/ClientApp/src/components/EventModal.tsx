@@ -1,7 +1,7 @@
 ﻿import * as React from 'react';
 import styled from 'styled-components';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { FlightEvent, Airport, FlightPlan, LeaderboardRecord } from '../Models';
+import { FlightEvent, Airport, FlightPlan, LeaderboardRecord, FlightPlanWaypoint } from '../Models';
 import { Query } from '@apollo/client/react/components';
 import { useQuery } from '@apollo/client/react/hooks';
 import { ApolloQueryResult } from '@apollo/client/core';
@@ -19,6 +19,7 @@ interface Props {
     toggle: () => void;
     onAirportLoaded: (airports: Airport[]) => void;
     onFlightPlansLoaded: (flightPlans: FlightPlan[]) => void;
+    onCheckpointsLoaded: (checkpoints: FlightPlanWaypoint[]) => void;
 }
 
 interface State {
@@ -97,6 +98,23 @@ export default class EventModal extends React.Component<Props, State> {
     }
 }`} variables={{ idents: event.waypoints.split(' ') }}>{({ loading, error, data }: ApolloQueryResult<{ airports: Airport[] }>) => {
                                     if (!loading && !error && data) this.props.onAirportLoaded(data.airports);
+                                    return null;
+                                }}</Query>}
+
+                            {event.type === "RACE" && <Query query={gql`query GetCheckPoints($id: Uuid!) {
+    flightEvent(id: $id) {
+        id
+        checkpoints {
+            latitude
+            longitude
+        }
+    }
+}`} variables={{ id: this.props.flightEvent.id }}>{({ loading, error, data }: ApolloQueryResult<{ flightEvent: { checkpoints: FlightPlanWaypoint[] } }>) => {
+                                    if (loading) return null;
+                                    if (error) return null;
+
+                                    this.props.onCheckpointsLoaded(data.flightEvent.checkpoints);
+
                                     return null;
                                 }}</Query>}
 

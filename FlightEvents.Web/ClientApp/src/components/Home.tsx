@@ -3,7 +3,7 @@ import * as signalr from '@microsoft/signalr';
 import 'msgpack5';
 import * as protocol from '@microsoft/signalr-protocol-msgpack';
 import { convertPropertyNames, pascalCaseToCamelCase } from '../Converters';
-import { AircraftStatus, Airport, FlightPlan, FlightPlanData, ATCStatus, ATCInfo, AircraftStatusBrief } from '../Models';
+import { AircraftStatus, Airport, FlightPlan, FlightPlanData, ATCStatus, ATCInfo, AircraftStatusBrief, FlightPlanWaypoint } from '../Models';
 import AircraftList, { AircraftStatusInList } from './AircraftList';
 import ControllerList from './ControllerList';
 import EventList from './EventList';
@@ -102,6 +102,7 @@ export class Home extends React.Component<Props, State> {
 
         this.handleAirportsLoaded = this.handleAirportsLoaded.bind(this);
         this.handleFlightPlansLoaded = this.handleFlightPlansLoaded.bind(this);
+        this.handleCheckpointsLoaded = this.handleCheckpointsLoaded.bind(this);
         this.handleTeleportCompleted = this.handleTeleportCompleted.bind(this);
 
         this.cleanUp = this.cleanUp.bind(this);
@@ -456,6 +457,10 @@ export class Home extends React.Component<Props, State> {
         this.map.drawFlightPlans(flightPlans.map(o => o.data));
     }
 
+    private handleCheckpointsLoaded(checkpoints: FlightPlanWaypoint[]) {
+        this.map.drawCheckpoints(checkpoints);
+    }
+
     public handleTeleportCompleted() {
         this.setState({ movingPosition: null });
     }
@@ -489,7 +494,7 @@ export class Home extends React.Component<Props, State> {
                 onMoreInfoChanged={this.handleMoreInfoChanged} moreInfoClientIds={this.state.moreInfoClientIds}
             />
 
-            <EventList hub={this.hub} onAirportsLoaded={this.handleAirportsLoaded} onFlightPlansLoaded={this.handleFlightPlansLoaded} />
+            <EventList hub={this.hub} onAirportsLoaded={this.handleAirportsLoaded} onFlightPlansLoaded={this.handleFlightPlansLoaded} onCheckpointsLoaded={this.handleCheckpointsLoaded} />
 
             <TeleportDialog hub={this.hub} selectedPosition={this.state.movingPosition} onComplete={this.handleTeleportCompleted} />
         </>;
